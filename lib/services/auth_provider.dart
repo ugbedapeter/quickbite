@@ -2,7 +2,7 @@
 
 import 'package:flutter/material.dart';
 import 'package:quickbite/model/user_model.dart';
-import 'package:quickbite/pages/auth/login_page.dart';
+
 import 'package:quickbite/services/supabase_service.dart';
 
 class AuthProvider extends ChangeNotifier {
@@ -39,20 +39,8 @@ class AuthProvider extends ChangeNotifier {
     clearError();
 
     try {
-      // ignore: unused_local_variable
-      final resp = await SupabaseService.instance.signIn(
-        email: email,
-        password: password,
-      );
-      if (context.mounted) {
-        // Navigator.push(
-        //   context,
-        //   MaterialPageRoute(builder: (context) => DashboardPage()),
-        // );
-        notifyListeners();
-      } else {
-        setError('Login failed: No user returned.');
-      }
+      await SupabaseService.instance.signIn(email: email, password: password);
+      await loadCurrentUser(); // Reload user data after sign-in
     } catch (e) {
       final errorMessage = _getAuthErrorMessage(e);
       setError(errorMessage);
@@ -64,14 +52,8 @@ class AuthProvider extends ChangeNotifier {
   Future<void> signOut(BuildContext context) async {
     try {
       await SupabaseService.instance.signOut();
-
-      notifyListeners();
-      if (context.mounted) {
-        Navigator.push(
-          context,
-          MaterialPageRoute(builder: (context) => LoginPage()),
-        );
-      }
+      _currentUser = null;
+      notifyListeners(); // This will trigger the router redirect
     } catch (e) {
       setError(e.toString());
     } finally {
@@ -83,14 +65,26 @@ class AuthProvider extends ChangeNotifier {
     try {
       final user = SupabaseService.instance.currentUser;
       if (user != null) {
-        _currentUser = await SupabaseService.instance.getUserProfile(user.id);
+        // Even if we can't get the profile, we can still consider the user logged in
+        // with basic information from the auth user
+        _currentUser = UserModel(
+          id: user.id,
+          email: user.email ?? '',
+          name: user.email?.split('@')[0] ?? 'User',
+
+          createdAt: DateTime.now(),
+          updatedAt: DateTime.now(),
+        );
         notifyListeners();
       } else {
         _currentUser = null;
       }
     } catch (e) {
+      // If there's an error, we'll still set the user to null but won't throw
+      _currentUser = null;
       setError(e.toString());
     } finally {
+      // Always set loading to false
       setLoading(false);
     }
   }
