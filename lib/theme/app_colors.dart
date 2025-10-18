@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 
 class AppColors {
   // Primary Colors
-  static const Color primaryBlue = Color.fromARGB(255, 26, 77, 62);
+  static const Color primaryBlue = Color.fromARGB(255, 7, 56, 148);
   static const Color primaryOrange = Color(0xFFF5A623);
 
   // Background Colors
@@ -21,7 +21,7 @@ class AppColors {
   static const Color info = Color(0xFF17A2B8);
 
   // Border and Divider Colors
-  static const Color border = Color(0xFFE9ECEF);
+  static const Color border = Color.fromARGB(255, 236, 236, 236);
   static const Color divider = Color(0xFFDEE2E6);
 
   // Shadow Colors
