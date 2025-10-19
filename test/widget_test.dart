@@ -41,6 +41,9 @@ void main() {
       ),
     );
 
+    // pump() advances the frame. This is needed to allow the post-frame callback
+    // in QuickApp to run, which triggers the initial navigation.
+    await tester.pump();
     // The app should initially show the splash screen while it's loading.
     expect(find.byType(SplashScreen), findsOneWidget);
   });
