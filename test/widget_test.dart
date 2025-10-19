@@ -30,23 +30,29 @@ void main() {
 
   testWidgets('App starts and shows SplashScreen', (WidgetTester tester) async {
     // Build our app with all the necessary providers.
-    await tester.pumpWidget(
-      MultiProvider(
-        providers: [
-          ChangeNotifierProvider(create: (context) => ThemeProvider()),
-          ChangeNotifierProvider(create: (context) => AuthProvider()),
-          ChangeNotifierProvider(create: (_) => ConnectivityProvider()),
-        ],
-        child: const QuickApp(),
-      ),
-    );
+    testWidgets('App starts and shows SplashScreen', (
+      WidgetTester tester,
+    ) async {
+      await tester.pumpWidget(
+        MultiProvider(
+          providers: [
+            ChangeNotifierProvider(create: (_) => ThemeProvider()),
+            ChangeNotifierProvider(create: (_) => AuthProvider()),
+            ChangeNotifierProvider(create: (_) => ConnectivityProvider()),
+          ],
+          child: const QuickApp(),
+        ),
+      );
 
-    // pumpAndSettle() will continue to pump frames until the UI is stable.
-    // This ensures we wait for the initial loading and redirection to complete.
-    await tester.pumpAndSettle();
+      // Let the first frame render (SplashScreen may appear here)
+      await tester.pump();
 
-    // The app should initially show the splash screen while it's loading.
-    expect(find.byType(SplashScreen), findsOneWidget);
+      // Check if SplashScreen is shown right away
+      expect(find.byType(SplashScreen), findsOneWidget);
+
+      // Let navigation settle afterward
+      await tester.pumpAndSettle();
+    });
   });
 }
 
