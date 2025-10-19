@@ -29,30 +29,25 @@ void main() {
   });
 
   testWidgets('App starts and shows SplashScreen', (WidgetTester tester) async {
-    // Build our app with all the necessary providers.
-    testWidgets('App starts and shows SplashScreen', (
-      WidgetTester tester,
-    ) async {
-      await tester.pumpWidget(
-        MultiProvider(
-          providers: [
-            ChangeNotifierProvider(create: (_) => ThemeProvider()),
-            ChangeNotifierProvider(create: (_) => AuthProvider()),
-            ChangeNotifierProvider(create: (_) => ConnectivityProvider()),
-          ],
-          child: const QuickApp(),
-        ),
-      );
+    await tester.pumpWidget(
+      MultiProvider(
+        providers: [
+          ChangeNotifierProvider(create: (_) => ThemeProvider()),
+          ChangeNotifierProvider(create: (_) => AuthProvider()),
+          ChangeNotifierProvider(create: (_) => ConnectivityProvider()),
+        ],
+        child: const QuickApp(),
+      ),
+    );
 
-      // Let the first frame render (SplashScreen may appear here)
-      await tester.pump();
+    // Let the first frame render (SplashScreen may appear here)
+    await tester.pump();
 
-      // Check if SplashScreen is shown right away
-      expect(find.byType(SplashScreen), findsOneWidget);
+    // Check if SplashScreen is shown right away
+    expect(find.byType(SplashScreen), findsOneWidget);
 
-      // Let navigation settle afterward
-      await tester.pumpAndSettle();
-    });
+    // Let navigation settle afterward
+    await tester.pumpAndSettle();
   });
 }
 
