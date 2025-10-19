@@ -8,6 +8,7 @@ import 'package:quickbite/services/auth_provider.dart';
 import 'package:quickbite/services/connectivity_provider.dart';
 import 'package:quickbite/services/supabase_config.dart';
 import 'package:quickbite/theme/theme_provider.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
 void main() {
@@ -16,6 +17,9 @@ void main() {
   // For this test, we just need to initialize it to prevent errors.
   setUpAll(() async {
     WidgetsFlutterBinding.ensureInitialized();
+    // Mock SharedPreferences to prevent MissingPluginException during tests.
+    SharedPreferences.setMockInitialValues({});
+
     await Supabase.initialize(
       url: SupabaseConfig.supabaseUrl,
       anonKey: SupabaseConfig.supabaseAnonKey,
