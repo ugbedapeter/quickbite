@@ -1,8 +1,31 @@
 import 'dart:io';
+
+import 'package:flutter/material.dart';
 import 'package:quickbite/model/user_model.dart';
+import 'package:quickbite/model/category_model.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
 class SupabaseService {
+  // Create profile row
+  Future<void> createProfile({
+    required String id,
+    required String fullName,
+    required String email,
+  }) async {
+    try {
+      // Use upsert to avoid unique conflicts if profile already exists
+      await client.from('profiles').insert({
+        'id': id,
+        'full_name': fullName,
+        'email': email,
+        'updated_at': DateTime.now().toIso8601String(),
+      });
+    } catch (e) {
+      // rethrow so callers can handle or log
+      rethrow;
+    }
+  }
+
   static SupabaseService? _instance;
   static SupabaseService get instance => _instance ??= SupabaseService._();
   User? get currentUser => client.auth.currentUser;
@@ -36,6 +59,24 @@ class SupabaseService {
       email: email,
       password: password,
     );
+  }
+
+  // sign up
+  Future<AuthResponse> signUp({
+    required String email,
+    required String password,
+    required String username,
+  }) async {
+    try {
+      return await client.auth.signUp(
+        email: email,
+        password: password,
+        data: {'full_name': username},
+      );
+    } catch (e) {
+      // If profile creation fails, we should clean up the auth user
+      rethrow;
+    }
   }
 
   // sign out
@@ -73,20 +114,58 @@ class SupabaseService {
     }
   }
 
+  // fetch categories
+  Future<List<CategoryModel>> fetchCategories() async {
+    try {
+      final response = await client
+          .from('categories')
+          .select('id, name')
+          .order('name', ascending: true);
+
+      final categories = (response as List)
+          .map((category) => CategoryModel.fromJson(category))
+          .toList();
+      return categories;
+    } catch (e) {
+      return [];
+    }
+  }
+
   // Dashboard helpers
 
   // fetch products
-  Future<List<Map<String, dynamic>>> fetchProducts() async {
-    final response = await client
-        .from('products')
-        .select(
-          'id, name, price, category_id, description, image_url, created_at',
-        )
-        .order('created_at', ascending: false);
-    return List<Map<String, dynamic>>.from(response);
+  Future<List<Map<String, dynamic>>> fetchProducts({
+    String? searchQuery,
+    String? categoryId,
+  }) async {
+    try {
+      var query = client.from('products').select('''
+            id,
+            name,
+            description,
+            price,
+            categoryId,
+            created_at,
+            image_url
+          ''');
+
+      if (searchQuery != null && searchQuery.isNotEmpty) {
+        query = query.ilike('name', '%$searchQuery%');
+      }
+
+      if (categoryId != null && categoryId.isNotEmpty) {
+        query = query.eq('categoryId', categoryId);
+      }
+
+      final response = await query.order('created_at', ascending: false);
+      return List<Map<String, dynamic>>.from(response);
+    } catch (e) {
+      debugPrint('Error fetching products: $e');
+      return []; // Return an empty list on error to prevent crashes
+    }
   }
 
-  // Storage methods
+  // Storage methodss
   Future<String> uploadProductImage(String filePath) async {
     if (!isInitialized) {
       throw Exception('Supabase not initialized. Please restart the app.');
@@ -204,5 +283,46 @@ class SupabaseService {
     await client.from('order_items').delete().eq('order_id', orderId);
     // Then delete the order
     await client.from('orders').delete().eq('id', orderId);
+  }
+
+  Future<void> addFavorite(String userId, String productId) async {
+    await client.from('favorites').insert({
+      'user_id': userId,
+      'product_id': productId,
+      'created_at': DateTime.now().toIso8601String(),
+    });
+  }
+
+  Future<void> removeFavorite(String userId, String productId) async {
+    await client
+        .from('favorites')
+        .delete()
+        .eq('user_id', userId)
+        .eq('product_id', productId);
+  }
+
+  Future<void> removeFavoriteForUser(String userId, String productId) async {
+    await client.from('favorites').delete().match({
+      'user_id': userId,
+      'product_id': productId,
+    });
+  }
+
+  Future<bool> isFavorite(String userId, String productId) async {
+    final response = await client
+        .from('favorites')
+        .select()
+        .eq('user_id', userId)
+        .eq('product_id', productId)
+        .maybeSingle();
+    return response != null;
+  }
+
+  Future<List<String>> getFavoritesForUser(String userId) async {
+    final response = await client
+        .from('favorites')
+        .select('product_id')
+        .eq('user_id', userId);
+    return List<String>.from(response.map((item) => item['product_id']));
   }
 }

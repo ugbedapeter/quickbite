@@ -36,7 +36,7 @@ void main() {
           ChangeNotifierProvider(create: (_) => AuthProvider()),
           ChangeNotifierProvider(create: (_) => ConnectivityProvider()),
         ],
-        child: const QuickApp(),
+        child: const QuickApp(seenOnboarding: false),
       ),
     );
 

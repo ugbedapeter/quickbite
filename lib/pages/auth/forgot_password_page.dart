@@ -34,18 +34,18 @@ class _ForgotPasswordPageState extends State<ForgotPasswordPage> {
           Positioned(
             top: 50,
             left: 15,
-            child: Container(
-              height: 40,
-              width: 40,
-              decoration: BoxDecoration(
-                color: Theme.of(context).colorScheme.tertiary.withAlpha(120),
-                shape: BoxShape.circle,
-              ),
-              child: IconButton(
-                onPressed: () {
-                  context.pop();
-                },
-                icon: Icon(Icons.arrow_back),
+            child: GestureDetector(
+              onTap: () {
+                context.pop();
+              },
+              child: Container(
+                height: 40,
+                width: 40,
+                decoration: BoxDecoration(
+                  color: Theme.of(context).colorScheme.tertiary.withAlpha(120),
+                  shape: BoxShape.circle,
+                ),
+                child: Icon(Icons.arrow_back),
               ),
             ),
           ),

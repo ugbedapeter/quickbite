@@ -9,6 +9,7 @@ import 'package:quickbite/services/supabase_config.dart';
 
 import 'package:quickbite/theme/theme_provider.dart';
 import 'package:quickbite/widgets/offline_banner.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
 void main() async {
@@ -18,20 +19,28 @@ void main() async {
     url: SupabaseConfig.supabaseUrl,
     anonKey: SupabaseConfig.supabaseAnonKey,
   );
+
+  // Check if onboarding has been seen before building the UI
+  final prefs = await SharedPreferences.getInstance();
+  final seenOnboarding = prefs.getBool('seenOnboarding') ?? false;
+
   runApp(
     MultiProvider(
       providers: [
         ChangeNotifierProvider(create: (context) => ThemeProvider()),
-        ChangeNotifierProvider(create: (context) => AuthProvider()),
+        ChangeNotifierProvider(
+          create: (context) => AuthProvider()..loadCurrentUser(),
+        ),
         ChangeNotifierProvider(create: (_) => ConnectivityProvider()),
       ],
-      child: const QuickApp(),
+      child: QuickApp(seenOnboarding: seenOnboarding),
     ),
   );
 }
 
 class QuickApp extends StatefulWidget {
-  const QuickApp({super.key});
+  final bool seenOnboarding;
+  const QuickApp({super.key, required this.seenOnboarding});
 
   @override
   State<QuickApp> createState() => _QuickAppState();
@@ -46,14 +55,19 @@ class _QuickAppState extends State<QuickApp> {
     super.didChangeDependencies();
     if (!_initialized) {
       // Initialize router synchronously. It's safe to use context.read here.
-      _router = NavigationService.createRouter(context.read<AuthProvider>());
+      _router = NavigationService.createRouter(
+        context.read<AuthProvider>(),
+        widget.seenOnboarding,
+      );
 
       // Use post-frame callback for async operations to avoid build conflicts.
       WidgetsBinding.instance.addPostFrameCallback((_) async {
         final authProvider = Provider.of<AuthProvider>(context, listen: false);
         try {
           // Initialize auth
-          await authProvider.loadCurrentUser();
+          if (!authProvider.isAuthenticated) {
+            await authProvider.loadCurrentUser();
+          }
         } finally {}
       });
       _initialized = true;

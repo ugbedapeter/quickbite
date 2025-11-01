@@ -1,0 +1,56 @@
+# Ignore build outputs and OS files to keep Docker build context small
+build/
+.android/
+.ios/
+.flutter-plugins
+.flutter-plugins-dependencies
+.packages
+.purse
+
+# Dart/Flutter tool directories and caches
+.dart_tool/
+pubspec.lock
+
+# IDE/editor/project files
+.vscode/
+.idea/
+*.iml
+
+# Node/npm
+node_modules/
+
+# Logs and temporary files
+**/log/
+*.log
+*.tmp
+*.temp
+
+# Git
+.git
+.gitignore
+
+# Secrets and environment files
+.env
+.env.*
+secrets/
+
+# macOS
+.DS_Store
+
+# Linux
+*.swp
+
+# Misc
+coverage/
+reports/
+
+# Optional: ignore tests if you don't need them in the container
+test/
+
+# Keep the flutter SDK cache out unless you purposely want it in the build context
+~/.pub-cache
+
+# Ignore large media or local assets not required for the web build
+assets/local_assets/
+
+# End of .dockerignore
