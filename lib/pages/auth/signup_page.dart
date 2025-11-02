@@ -1,3 +1,5 @@
+// ignore_for_file: use_build_context_synchronously
+
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
@@ -366,9 +368,7 @@ class _SignupPageState extends State<SignupPage> with TickerProviderStateMixin {
                                         decoration: TextDecoration.underline,
                                       ),
                                       recognizer: TapGestureRecognizer()
-                                        ..onTap = () {
-                                          print('Navigate to T&C');
-                                        },
+                                        ..onTap = () {},
                                     ),
                                   ],
                                 ),

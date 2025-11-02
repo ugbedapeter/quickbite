@@ -88,7 +88,7 @@ class ErrorHandler {
             Container(
               padding: const EdgeInsets.all(8),
               decoration: BoxDecoration(
-                color: Colors.red.withOpacity(0.1),
+                color: Colors.red.withAlpha(80),
                 borderRadius: BorderRadius.circular(8),
               ),
               child: const Icon(

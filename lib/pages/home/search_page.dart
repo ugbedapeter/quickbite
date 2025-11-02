@@ -7,7 +7,9 @@ import 'package:quickbite/model/category_model.dart';
 import 'package:quickbite/model/product_model.dart';
 import 'package:quickbite/services/auth_provider.dart';
 import 'package:quickbite/services/supabase_service.dart';
+import 'package:quickbite/theme/app_colors.dart';
 import 'package:quickbite/widgets/custom_text_field.dart';
+import 'package:quickbite/widgets/shimmer_widget.dart';
 import 'package:quickbite/widgets/product_card.dart';
 
 class SearchPage extends StatefulWidget {
@@ -103,7 +105,6 @@ class _SearchPageState extends State<SearchPage> {
 
           onSubmitted: (value) {
             // Implement search logic here// Handle search submission
-            print('Searching for: $value');
           },
         ),
       ),
@@ -111,7 +112,7 @@ class _SearchPageState extends State<SearchPage> {
         children: [
           // Category Filters
           SizedBox(
-            height: 50,
+            height: 40,
             child: FutureBuilder<List<CategoryModel>>(
               future: _categoriesFuture,
               builder: (context, snapshot) {
@@ -132,6 +133,9 @@ class _SearchPageState extends State<SearchPage> {
                             style: GoogleFonts.poppins(color: Colors.white),
                           ),
                           checkmarkColor: Colors.white,
+                          side: BorderSide.none,
+                          backgroundColor: Colors.grey,
+                          selectedColor: AppColors.primaryBlue,
                           selected: _selectedCategoryId == null,
                           onSelected: (selected) {
                             setState(() {
@@ -148,6 +152,9 @@ class _SearchPageState extends State<SearchPage> {
 
                       child: ChoiceChip(
                         checkmarkColor: Colors.white,
+                        side: BorderSide.none,
+                        backgroundColor: Colors.grey,
+                        selectedColor: AppColors.primaryBlue,
                         label: Text(
                           category.name,
                           style: GoogleFonts.poppins(color: Colors.white),
@@ -166,11 +173,24 @@ class _SearchPageState extends State<SearchPage> {
               },
             ),
           ),
-          const Divider(),
+
           // Product Results
           Expanded(
             child: _isLoading
-                ? const Center(child: CircularProgressIndicator())
+                ? GridView.builder(
+                    padding: const EdgeInsets.all(16),
+                    gridDelegate:
+                        const SliverGridDelegateWithMaxCrossAxisExtent(
+                          maxCrossAxisExtent: 260,
+                          mainAxisSpacing: 18,
+                          crossAxisSpacing: 18,
+                          childAspectRatio: 0.72,
+                        ),
+                    itemCount: 6, // Display 6 shimmer items as a placeholder
+                    itemBuilder: (context, index) {
+                      return const ShimmerProductCard();
+                    },
+                  )
                 : _products.isEmpty
                 ? Center(
                     child: Text(

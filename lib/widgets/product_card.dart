@@ -79,6 +79,7 @@ class _ProductCardState extends State<ProductCard> {
       // You might want to show a snackbar or log the error
       debugPrint('Error toggling favorite: $e');
     } finally {
+      // ignore: control_flow_in_finally
       if (!mounted) return;
       setState(() => _loading = false);
     }
@@ -111,7 +112,7 @@ class _ProductCardState extends State<ProductCard> {
           borderRadius: BorderRadius.circular(10),
           boxShadow: [
             BoxShadow(
-              color: Colors.black.withOpacity(0.1),
+              color: Colors.black.withAlpha(80),
               blurRadius: 10,
               offset: const Offset(0, 2),
             ),

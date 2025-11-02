@@ -8,6 +8,7 @@ import 'package:quickbite/model/product_model.dart';
 import 'package:quickbite/services/auth_provider.dart';
 import 'package:quickbite/theme/app_colors.dart';
 import 'package:quickbite/services/supabase_service.dart';
+import 'package:quickbite/widgets/shimmer_widget.dart';
 import 'package:quickbite/util/error_handler.dart';
 import 'package:quickbite/util/offline_guard.dart';
 import 'package:quickbite/widgets/product_card.dart';
@@ -193,7 +194,6 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
                               ),
                               onPressed: () {
                                 // Handle filter button press
-                                print('Filter button tapped');
                               },
                             ),
                           ),
@@ -257,9 +257,7 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
                           builder: (context, snapshot) {
                             if (snapshot.connectionState ==
                                 ConnectionState.waiting) {
-                              return const Center(
-                                child: CircularProgressIndicator(),
-                              );
+                              return const ShimmerList();
                             }
                             if (snapshot.hasError || !snapshot.hasData) {
                               return const Center(
@@ -338,26 +336,42 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
                         ),
                       ),
                       const SizedBox(height: 16),
-                      GridView.builder(
-                        shrinkWrap: true,
-                        physics: const NeverScrollableScrollPhysics(),
-
-                        gridDelegate:
-                            const SliverGridDelegateWithMaxCrossAxisExtent(
-                              maxCrossAxisExtent: 260,
-                              mainAxisSpacing: 18,
-                              crossAxisSpacing: 18,
-                              childAspectRatio: 0.72,
-                            ),
-                        itemCount: _products.length,
-                        itemBuilder: (context, index) {
-                          final product = _products[index];
-                          return ProductCard(
-                            product: product,
-                            currentUserId: currentUser?.id ?? '',
-                          );
-                        },
-                      ),
+                      if (_isLoading)
+                        GridView.builder(
+                          shrinkWrap: true,
+                          physics: const NeverScrollableScrollPhysics(),
+                          gridDelegate:
+                              const SliverGridDelegateWithMaxCrossAxisExtent(
+                                maxCrossAxisExtent: 260,
+                                mainAxisSpacing: 18,
+                                crossAxisSpacing: 18,
+                                childAspectRatio: 0.72,
+                              ),
+                          itemCount:
+                              4, // Display 4 shimmer items as a placeholder
+                          itemBuilder: (context, index) =>
+                              const ShimmerProductCard(),
+                        )
+                      else
+                        GridView.builder(
+                          shrinkWrap: true,
+                          physics: const NeverScrollableScrollPhysics(),
+                          gridDelegate:
+                              const SliverGridDelegateWithMaxCrossAxisExtent(
+                                maxCrossAxisExtent: 260,
+                                mainAxisSpacing: 18,
+                                crossAxisSpacing: 18,
+                                childAspectRatio: 0.72,
+                              ),
+                          itemCount: _products.length,
+                          itemBuilder: (context, index) {
+                            final product = _products[index];
+                            return ProductCard(
+                              product: product,
+                              currentUserId: currentUser?.id ?? '',
+                            );
+                          },
+                        ),
                     ],
                   ),
                 ),

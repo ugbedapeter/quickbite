@@ -325,4 +325,28 @@ class SupabaseService {
         .eq('user_id', userId);
     return List<String>.from(response.map((item) => item['product_id']));
   }
+
+  Future<List<Map<String, dynamic>>> fetchFavoriteProducts(
+    String userId,
+  ) async {
+    try {
+      // Use a PostgREST join to fetch the full product details for each favorite
+      final response = await client
+          .from('favorites')
+          .select('products(*)')
+          .eq('user_id', userId);
+
+      // The response is a list of objects like: { "products": { ...product_data... } }
+      // We need to extract the product data from each object.
+      final products = response
+          .map((fav) => fav['products'] as Map<String, dynamic>?)
+          .where((p) => p != null) // Filter out nulls if a product was deleted
+          .cast<Map<String, dynamic>>()
+          .toList();
+      return products;
+    } catch (e) {
+      debugPrint('Error fetching favorite products: $e');
+      return [];
+    }
+  }
 }

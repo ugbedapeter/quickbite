@@ -6,11 +6,13 @@ class OfflineGuard {
   static bool ensureOnline(BuildContext context, {String? message}) {
     final isOnline = context.read<ConnectivityProvider>().isOnline;
     if (!isOnline) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text(message ?? 'Connect to the internet to continue'),
-        ),
-      );
+      Future.microtask(() {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(message ?? 'Connect to the internet to continue'),
+          ),
+        );
+      });
       return false;
     }
     return true;
